@@ -8,10 +8,10 @@ const fetch = require('node-fetch');
     const notes = core.getInput('notes') || '';
     const projectId = core.getInput('projectId');
 
-    console.log('Token:', token ? '***' : 'missing');
-    console.log('Title:', title);
-    console.log('ProjectId:', projectId);
-    console.log('Notes:', notes);
+    core.info('Token:', token ? '***' : 'missing');
+    core.info('Title:', title);
+    core.info('ProjectId:', projectId);
+    core.info('Notes:', notes);
 
 
     // 1. Get workspace GID by fetching user info (me)
@@ -25,7 +25,7 @@ const fetch = require('node-fetch');
     const meData = await meResp.json();
     const workspaceGid = meData.data.workspaces[0].gid;
 
-    console.log('Workspace GID:', workspaceGid);
+    core.info('Workspace GID:', workspaceGid);
 
     // 2. Create task
     const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
@@ -50,7 +50,7 @@ const fetch = require('node-fetch');
     }
 
     const taskData = await taskResp.json();
-    console.log(`✅ Created task: ${taskData.data.gid}`);
+    core.info(`✅ Created task: ${taskData.data.gid}`);
     core.setOutput("taskId", taskData.data.gid);
 
   } catch (error) {

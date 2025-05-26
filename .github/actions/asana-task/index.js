@@ -91,7 +91,7 @@ async function run() {
     }
 
     if (assigneeId) {
-      taskData.assignee = assigneeId;
+      requestData.assignee = assigneeId;
     }
 
     // 2. Create task

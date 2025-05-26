@@ -40,7 +40,7 @@ jobs:
       - name: Use Asana Task Action
         uses: ./.github/actions/asana-task
         with:
-          token: ${{ secrets.ASANA_ACCESS_TOKEN }}
-          title: ${{ github.event.pull_request.title }}
+          asanaAccessToken: ${{ secrets.ASANA_ACCESS_TOKEN }}
+          prTitle: ${{ github.event.pull_request.title }}
           notes: "PR URL: ${{ github.event.pull_request.html_url }}"
           projectId: ${{ secrets.ASANA_PROJECT_ID }}

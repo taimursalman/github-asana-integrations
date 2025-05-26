@@ -1,6 +1,6 @@
 name: "Create Asana Task"
 description: "Creates a new task in Asana"
-author: "Your Name"
+author: "Taimur Salman"
 inputs:
   token:
     description: "Asana Personal Access Token"

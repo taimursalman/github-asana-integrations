@@ -1,0 +1,20 @@
+name: "Create Asana Task"
+description: "Creates a new task in Asana"
+author: "Your Name"
+inputs:
+  token:
+    description: "Asana Personal Access Token"
+    required: true
+  title:
+    description: "Task title"
+    required: true
+  notes:
+    description: "Task notes"
+    required: false
+  projectId:
+    description: "Asana project GID"
+    required: true
+
+runs:
+  using: "node20"
+  main: "index.js"

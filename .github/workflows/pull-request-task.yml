@@ -1,0 +1,20 @@
+name: Create Asana Task on PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  asana:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Asana Task Action
+        uses: ./.github/actions/asana-task
+        with:
+          token: ${{ secrets.ASANA_ACCESS_TOKEN }}
+          title: ${{ github.event.pull_request.title }}
+          notes: "PR URL: ${{ github.event.pull_request.html_url }}"
+          projectId: ${{ secrets.ASANA_PROJECT_ID }}

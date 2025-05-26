@@ -12,6 +12,8 @@ const asana = require('asana');
     const me = await client.users.me();
     const workspaceGid = me.workspaces[0].gid;
 
+    console.log('client is', client);
+    console.log('and the token is ', token);
     //test comment 2
 
     const task = await client.tasks.create({

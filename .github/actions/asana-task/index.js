@@ -3,14 +3,14 @@ const fetch = require('node-fetch');
 
 (async () => {
   try {
-    const asanaAccessToken = core.getInput('asanaAccessToken');
-    const title = core.getInput('prTitle');
+    const token = core.getInput('token');
+    const title = core.getInput('title');
     const notes = core.getInput('notes') || '';
     const projectId = core.getInput('projectId');
 
     // 1. Get workspace GID by fetching user info (me)
     const meResp = await fetch('https://app.asana.com/api/1.0/users/me', {
-      headers: { Authorization: `Bearer ${asanaAccessToken}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!meResp.ok) {
@@ -23,7 +23,7 @@ const fetch = require('node-fetch');
     const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${asanaAccessToken}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({

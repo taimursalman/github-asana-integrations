@@ -11,6 +11,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get PR author emails
+        id: get-emails
+        run: |
+          # Get commit author email (most reliable)
+          commit_email=$(gh api /repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits --jq '.[-1].commit.author.email')
+          echo "commit_email=$commit_email" >> $GITHUB_OUTPUT
+
+          # Get GitHub user login
+          github_user="${{ github.event.pull_request.user.login }}"
+          echo "github_user=$github_user" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -30,7 +43,7 @@ jobs:
           git config --global user.email 'github-actions@github.com'
               
           git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
-    
+
           git add dist/
           git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
         working-directory: .github/actions/asana-task
@@ -44,3 +57,5 @@ jobs:
           title: ${{ github.event.pull_request.title }}
           notes: "PR URL: ${{ github.event.pull_request.html_url }}"
           projectId: ${{ secrets.ASANA_PROJECT_ID }}
+          assignee-email: ${{ steps.get-emails.outputs.commit_email }}
+          github-user: ${{ steps.get-emails.outputs.github_user }}

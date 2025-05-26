@@ -14,6 +14,12 @@ inputs:
   projectId:
     description: "Asana project GID"
     required: true
+  assignee-email:
+    description: "Email of person to assign task to"
+    required: false
+  github-user:
+    description: "GitHub username of PR author"
+    required: false
 
 runs:
   using: "node20"

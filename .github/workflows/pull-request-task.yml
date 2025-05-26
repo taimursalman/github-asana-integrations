@@ -30,7 +30,7 @@ jobs:
           git config --global user.email 'github-actions@github.com'
           git add dist/
           git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
         working-directory: .github/actions/asana-task
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

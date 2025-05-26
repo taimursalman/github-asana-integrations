@@ -28,6 +28,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git add dist/
           git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
           git push origin HEAD:${{ github.head_ref }}

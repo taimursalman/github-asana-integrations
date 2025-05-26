@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const fetch = require('node-fetch');
 
-async function findAsanaUserByEmail(email, client, workspaceId) {
+async function findAsanaUserByEmail(email, token, workspaceId) {
   try {
     core.info(`Searching for Asana user with email: ${email}`);
 
@@ -81,7 +81,7 @@ async function run() {
     // Find assignee if email provided
     let assigneeId = null;
     if (assigneeEmail) {
-      const assignee = await findAsanaUserByEmail(assigneeEmail, client, 'YOUR_WORKSPACE_ID');
+      const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
       if (assignee) {
         assigneeId = assignee.gid;
         core.info(`Found Asana user: ${assignee.name} (${assignee.email})`);

@@ -3,8 +3,16 @@
     "version": "1.0.0",
     "description": "GitHub Action to create Asana tasks",
     "main": "index.js",
+    "scripts": {
+        "build": "ncc build index.js -o dist",
+        "prepare": "npm run build"
+    },
     "dependencies": {
         "@actions/core": "^1.11.1",
+        "@actions/github": "^6.0.1",
         "asana": "^3.0.16"
+    },
+    "devDependencies": {
+        "@vercel/ncc": "^0.38.3"
     }
 }

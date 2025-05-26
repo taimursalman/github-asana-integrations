@@ -11,6 +11,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .github/actions/asana-task
+
+      - name: Build Action with ncc
+        run: npm run build
+        working-directory: .github/actions/asana-task
+
+      - name: Commit built dist/ if changed
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add dist/
+          git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
+          git push
+        working-directory: .github/actions/asana-task
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Use Asana Task Action
         uses: ./.github/actions/asana-task
         with:

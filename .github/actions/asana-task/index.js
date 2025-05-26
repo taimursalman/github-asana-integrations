@@ -3,12 +3,33 @@ const fetch = require('node-fetch');
 
 async function findAsanaUserByEmail(email, client, workspaceId) {
   try {
-    const users = await client.users.findAll({
-      workspace: workspaceId,
-      opt_fields: 'name,email'
+    core.info(`Searching for Asana user with email: ${email}`);
+
+    const response = await fetch(`https://app.asana.com/api/1.0/users?workspace=${workspaceId}&opt_fields=name,email`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
     });
 
-    return users.data.find(user => user.email === email);
+    const data = await response.json();
+
+    if (data.errors) {
+      core.warning(`Asana API error: ${JSON.stringify(data.errors)}`);
+      return null;
+    }
+
+    // Find user by email
+    const user = data.data.find(user => user.email === email);
+
+    if (user) {
+      core.info(`Found user: ${user.name} (${user.email})`);
+      return user;
+    } else {
+      core.info(`No user found with email: ${email}`);
+      return null;
+    }
+
   } catch (error) {
     core.warning(`Failed to search for user with email ${email}: ${error.message}`);
     return null;

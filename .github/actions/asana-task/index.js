@@ -24,6 +24,8 @@ const asana = require('asana');
     console.log(`✅ Created task: ${task.gid}`);
     core.setOutput("taskId", task.gid);
   } catch (err) {
-    core.setFailed(`❌ Failed to create Asana task: ${err.message}`);
+    const message = errresponse?.data || errmessage || err
+    core.setFailed(`❌ Failed to create Asana task: ${JSON.stringify(message, null, 2)}`);
+
   }
 })();

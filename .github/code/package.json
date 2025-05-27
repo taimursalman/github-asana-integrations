@@ -2,7 +2,7 @@
     "name": "asana-github-action",
     "version": "1.0.0",
     "description": "GitHub Action to create Asana tasks",
-    "main": "./prod/index.js",
+    "main": "./.github/actions/asana-task/index.js",
     "scripts": {
         "typecheck": "tsc --noEmit",
         "build": "ncc build src/dev/index.ts -o prod -m -q --no-source-map-register",

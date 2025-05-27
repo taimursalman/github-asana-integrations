@@ -1,7 +1,42 @@
 import { getInput, setOutput, setFailed, info, warning } from '@actions/core';
 import fetch from 'node-fetch';
 
-async function findAsanaUserByEmail(email, token, workspaceId) {
+interface AsanaUser {
+  gid: string;
+  name: string;
+  email: string;
+}
+
+interface AsanaWorkspace {
+  gid: string;
+}
+
+interface AsanaUserResponse {
+  data: AsanaUser[];
+  errors?: Array<{ message: string }>;
+}
+
+interface AsanaMeResponse {
+  data: {
+    workspaces: AsanaWorkspace[];
+  };
+}
+
+interface AsanaTaskData {
+  name: string;
+  notes: string;
+  projects: string[];
+  workspace: string;
+  assignee?: string;
+}
+
+interface AsanaTaskResponse {
+  data: {
+    gid: string;
+  };
+}
+
+async function findAsanaUserByEmail(email: string, token: string, workspaceId: string): Promise<AsanaUser | null> {
   try {
     info(`Searching for Asana user with email: ${email}`);
 
@@ -12,7 +47,7 @@ async function findAsanaUserByEmail(email, token, workspaceId) {
       }
     });
 
-    const data = await response.json();
+    const data = await response.json() as AsanaUserResponse;
 
     if (data.errors) {
       warning(`Asana API error: ${JSON.stringify(data.errors)}`);
@@ -31,12 +66,12 @@ async function findAsanaUserByEmail(email, token, workspaceId) {
     }
 
   } catch (error) {
-    warning(`Failed to search for user with email ${email}: ${error.message}`);
+    warning(`Failed to search for user with email ${email}: ${(error as Error).message}`);
     return null;
   }
 }
 
-async function getWorkspaceGid(token) {
+async function getWorkspaceGid(token: string): Promise<string> {
   const meResp = await fetch('https://app.asana.com/api/1.0/users/me', {
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -44,12 +79,12 @@ async function getWorkspaceGid(token) {
   if (!meResp.ok) {
     throw new Error(`Failed to fetch user info: ${meResp.statusText}`);
   }
-  const meData = await meResp.json();
+  const meData = await meResp.json() as AsanaMeResponse;
   const workspaceGid = meData.data.workspaces[0].gid;
   return workspaceGid;
 }
 
-async function run() {
+async function run(): Promise<void> {
   try {
     const token = getInput('token');
     const title = getInput('title');
@@ -67,17 +102,17 @@ async function run() {
 
     // 1. Get workspace GID by fetching user info (me)
     const workspaceGid = await getWorkspaceGid(token);
-    info('Workspace GID:', workspaceGid);
+    info(`Workspace GID: ${workspaceGid}`);
 
-    const requestData = {
+    const requestData: AsanaTaskData = {
       name: title,
       notes,
       projects: [projectId],
       workspace: workspaceGid
-    }
+    };
 
     // Find assignee if email provided
-    let assigneeId = null;
+    let assigneeId: string | null = null;
     if (assigneeEmail) {
       const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
       if (assignee) {
@@ -107,12 +142,12 @@ async function run() {
       throw new Error(`Failed to create task: ${JSON.stringify(errorData)}`);
     }
 
-    const taskData = await taskResp.json();
+    const taskData = await taskResp.json() as AsanaTaskResponse;
     info(`✅ Created task: ${taskData.data.gid}`);
     setOutput("taskId", taskData.data.gid);
 
   } catch (error) {
-    const message = error?.message || error;
+    const message = (error as Error)?.message || String(error);
     setFailed(`❌ Failed to create Asana task: ${message}`);
   }
 }

@@ -2,10 +2,12 @@
     "name": "asana-github-action",
     "version": "1.0.0",
     "description": "GitHub Action to create Asana tasks",
-    "main": "index.js",
+    "main": "prod/index.js",
     "scripts": {
-        "build": "ncc build index.js -o dist",
-        "prepare": "npm run build"
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "prepack": "npm run build",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
         "@actions/core": "^1.11.1",
@@ -14,7 +16,17 @@
         "node-fetch": "^2.7.0"
     },
     "devDependencies": {
-        "@vercel/ncc": "^0.38.3"
+        "@types/node": "^22.15.21",
+        "@types/node-fetch": "^2.6.12",
+        "@vercel/ncc": "^0.38.3",
+        "typescript": "^5.8.3"
     },
-    "type": "module"
+    "type": "module",
+    "keywords": [
+        "github-actions",
+        "asana",
+        "integration"
+    ],
+    "author": "Taimur Salman",
+    "license": "MIT"
 }

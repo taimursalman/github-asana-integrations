@@ -32,15 +32,15 @@ jobs:
       - name: Build Action with ncc
         run: npm run build
         working-directory: .github/actions/asana-task
-      - name: Commit built dist/ if changed
+      - name: Commit built prod/ if changed
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
               
           git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
-          git add dist/
-          git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
+          git add prod/
+          git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
         working-directory: .github/actions/asana-task
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

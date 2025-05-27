@@ -1,9 +1,9 @@
-const core = require('@actions/core');
-const fetch = require('node-fetch');
+import { getInput, setOutput, setFailed, info, warning } from '@actions/core';
+import fetch from 'node-fetch';
 
 async function findAsanaUserByEmail(email, token, workspaceId) {
   try {
-    core.info(`Searching for Asana user with email: ${email}`);
+    info(`Searching for Asana user with email: ${email}`);
 
     const response = await fetch(`https://app.asana.com/api/1.0/users?workspace=${workspaceId}&opt_fields=name,email`, {
       headers: {
@@ -15,7 +15,7 @@ async function findAsanaUserByEmail(email, token, workspaceId) {
     const data = await response.json();
 
     if (data.errors) {
-      core.warning(`Asana API error: ${JSON.stringify(data.errors)}`);
+      warning(`Asana API error: ${JSON.stringify(data.errors)}`);
       return null;
     }
 
@@ -23,15 +23,15 @@ async function findAsanaUserByEmail(email, token, workspaceId) {
     const user = data.data.find(user => user.email === email);
 
     if (user) {
-      core.info(`Found user: ${user.name} (${user.email})`);
+      info(`Found user: ${user.name} (${user.email})`);
       return user;
     } else {
-      core.info(`No user found with email: ${email}`);
+      info(`No user found with email: ${email}`);
       return null;
     }
 
   } catch (error) {
-    core.warning(`Failed to search for user with email ${email}: ${error.message}`);
+    warning(`Failed to search for user with email ${email}: ${error.message}`);
     return null;
   }
 }
@@ -49,27 +49,25 @@ async function getWorkspaceGid(token) {
   return workspaceGid;
 }
 
-
 async function run() {
   try {
-    const token = core.getInput('token');
-    const title = core.getInput('title');
-    const notes = core.getInput('notes') || '';
-    const projectId = core.getInput('projectId');
-    const assigneeEmail = core.getInput('assignee-email');
-    const githubUser = core.getInput('github-user');
+    const token = getInput('token');
+    const title = getInput('title');
+    const notes = getInput('notes') || '';
+    const projectId = getInput('projectId');
+    const assigneeEmail = getInput('assignee-email');
+    const githubUser = getInput('github-user');
 
-
-    core.info(`Token: ${token}`);
-    core.info(`Title: ${title}`);
-    core.info(`ProjectId: ${projectId}`);
-    core.info(`Notes: ${notes}`);
-    core.info(`Assignee Email: ${assigneeEmail}`);
-    core.info(`GitHub User: ${githubUser}`);
+    info(`Token: ${token}`);
+    info(`Title: ${title}`);
+    info(`ProjectId: ${projectId}`);
+    info(`Notes: ${notes}`);
+    info(`Assignee Email: ${assigneeEmail}`);
+    info(`GitHub User: ${githubUser}`);
 
     // 1. Get workspace GID by fetching user info (me)
     const workspaceGid = await getWorkspaceGid(token);
-    core.info('Workspace GID:', workspaceGid);
+    info('Workspace GID:', workspaceGid);
 
     const requestData = {
       name: title,
@@ -84,9 +82,9 @@ async function run() {
       const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
       if (assignee) {
         assigneeId = assignee.gid;
-        core.info(`Found Asana user: ${assignee.name} (${assignee.email})`);
+        info(`Found Asana user: ${assignee.name} (${assignee.email})`);
       } else {
-        core.warning(`Could not find Asana user with email: ${assigneeEmail}`);
+        warning(`Could not find Asana user with email: ${assigneeEmail}`);
       }
     }
 
@@ -110,12 +108,12 @@ async function run() {
     }
 
     const taskData = await taskResp.json();
-    core.info(`✅ Created task: ${taskData.data.gid}`);
-    core.setOutput("taskId", taskData.data.gid);
+    info(`✅ Created task: ${taskData.data.gid}`);
+    setOutput("taskId", taskData.data.gid);
 
   } catch (error) {
     const message = error?.message || error;
-    core.setFailed(`❌ Failed to create Asana task: ${message}`);
+    setFailed(`❌ Failed to create Asana task: ${message}`);
   }
 }
 

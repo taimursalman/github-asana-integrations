@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Use Asana Task Action
-        uses: ./.github/actions/asana-task
+        uses: ./.github/actions/create-asana-task
         with:
           token: ${{ secrets.ASANA_ACCESS_TOKEN }}
           title: ${{ github.event.pull_request.title }}

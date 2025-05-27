@@ -34,18 +34,18 @@ jobs:
       # - name: Build Action with ncc
       #   run: npm run prepack
       #   working-directory: .github/code
-      # - name: Commit built prod/ if changed
-      #   run: |
-      #     git config --global user.name 'github-actions'
-      #     git config --global user.email 'github-actions@github.com'
+      - name: Commit built prod/ if changed
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
               
-      #     git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
-      #     git add ../actions
-      #     git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
-      #   working-directory: .github/code
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git add ../actions
+          git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
+        working-directory: .github/code
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Use Asana Task Action
         uses: ./.github/actions/create-asana-task
         with:

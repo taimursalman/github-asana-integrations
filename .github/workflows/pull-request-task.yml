@@ -30,7 +30,7 @@ jobs:
         run: npm install
         working-directory: .github/code
       - name: Build Action with ncc
-        run: npm run build
+        run: npm run prepack
         working-directory: .github/code
       - name: Commit built prod/ if changed
         run: |

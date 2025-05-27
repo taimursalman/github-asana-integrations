@@ -1,108 +1,28 @@
-import { getInput, setOutput, setFailed, info, warning } from '@actions/core';
+import * as core from '@actions/core';
 import fetch from 'node-fetch';
+import { findAsanaUserByEmail, getWorkspaceGid } from './components/create-asana-task/create-asana-task-library';
+import { AsanaTaskData, AsanaTaskResponse } from './components/create-asana-task/create-asana-task.types';
 
-interface AsanaUser {
-  gid: string;
-  name: string;
-  email: string;
-}
-
-interface AsanaWorkspace {
-  gid: string;
-}
-
-interface AsanaUserResponse {
-  data: AsanaUser[];
-  errors?: Array<{ message: string }>;
-}
-
-interface AsanaMeResponse {
-  data: {
-    workspaces: AsanaWorkspace[];
-  };
-}
-
-interface AsanaTaskData {
-  name: string;
-  notes: string;
-  projects: string[];
-  workspace: string;
-  assignee?: string;
-}
-
-interface AsanaTaskResponse {
-  data: {
-    gid: string;
-  };
-}
-
-async function findAsanaUserByEmail(email: string, token: string, workspaceId: string): Promise<AsanaUser | null> {
-  try {
-    info(`Searching for Asana user with email: ${email}`);
-
-    const response = await fetch(`https://app.asana.com/api/1.0/users?workspace=${workspaceId}&opt_fields=name,email`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    const data = await response.json() as AsanaUserResponse;
-
-    if (data.errors) {
-      warning(`Asana API error: ${JSON.stringify(data.errors)}`);
-      return null;
-    }
-
-    // Find user by email
-    const user = data.data.find(user => user.email === email);
-
-    if (user) {
-      info(`Found user: ${user.name} (${user.email})`);
-      return user;
-    } else {
-      info(`No user found with email: ${email}`);
-      return null;
-    }
-
-  } catch (error) {
-    warning(`Failed to search for user with email ${email}: ${(error as Error).message}`);
-    return null;
-  }
-}
-
-async function getWorkspaceGid(token: string): Promise<string> {
-  const meResp = await fetch('https://app.asana.com/api/1.0/users/me', {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!meResp.ok) {
-    throw new Error(`Failed to fetch user info: ${meResp.statusText}`);
-  }
-  const meData = await meResp.json() as AsanaMeResponse;
-  const workspaceGid = meData.data.workspaces[0].gid;
-  return workspaceGid;
-}
 
 async function run(): Promise<void> {
   try {
-    const token = getInput('token');
-    const title = getInput('title');
-    const notes = getInput('notes') || '';
-    const projectId = getInput('projectId');
-    const assigneeEmail = getInput('assignee-email');
-    const githubUser = getInput('github-user');
+    const token = core.getInput('token');
+    const title = core.getInput('title');
+    const notes = core.getInput('notes') || '';
+    const projectId = core.getInput('projectId');
+    const assigneeEmail = core.getInput('assignee-email');
+    const githubUser = core.getInput('github-user');
 
-    info(`Token: ${token}`);
-    info(`Title: ${title}`);
-    info(`ProjectId: ${projectId}`);
-    info(`Notes: ${notes}`);
-    info(`Assignee Email: ${assigneeEmail}`);
-    info(`GitHub User: ${githubUser}`);
+    core.info(`Token: ${token}`);
+    core.info(`Title: ${title}`);
+    core.info(`ProjectId: ${projectId}`);
+    core.info(`Notes: ${notes}`);
+    core.info(`Assignee Email: ${assigneeEmail}`);
+    core.info(`GitHub User: ${githubUser}`);
 
     // 1. Get workspace GID by fetching user info (me)
     const workspaceGid = await getWorkspaceGid(token);
-    info(`Workspace GID: ${workspaceGid}`);
+    core.info(`Workspace GID: ${workspaceGid}`);
 
     const requestData: AsanaTaskData = {
       name: title,
@@ -117,9 +37,9 @@ async function run(): Promise<void> {
       const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
       if (assignee) {
         assigneeId = assignee.gid;
-        info(`Found Asana user: ${assignee.name} (${assignee.email})`);
+        core.info(`Found Asana user: ${assignee.name} (${assignee.email})`);
       } else {
-        warning(`Could not find Asana user with email: ${assigneeEmail}`);
+        core.warning(`Could not find Asana user with email: ${assigneeEmail}`);
       }
     }
 
@@ -143,12 +63,12 @@ async function run(): Promise<void> {
     }
 
     const taskData = await taskResp.json() as AsanaTaskResponse;
-    info(`✅ Created task: ${taskData.data.gid}`);
-    setOutput("taskId", taskData.data.gid);
+    core.info(`✅ Created task: ${taskData.data.gid}`);
+    core.setOutput("taskId", taskData.data.gid);
 
   } catch (error) {
     const message = (error as Error)?.message || String(error);
-    setFailed(`❌ Failed to create Asana task: ${message}`);
+    core.setFailed(`❌ Failed to create Asana task: ${message}`);
   }
 }
 

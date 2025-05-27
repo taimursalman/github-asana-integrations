@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import * as asana from 'asana';
+
 import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
 import { AsanaTaskResponse } from '@/src/components/create-asana-task/create-asana-task.types';
 

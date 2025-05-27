@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as asana from 'asana';
 import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
+import { AsanaTaskResponse } from '@/src/components/create-asana-task/create-asana-task.types';
 
 interface TaskData {
     name: string;
@@ -51,11 +52,32 @@ export const createAsanaTask = async () => {
             }
         }
 
-        // 2. Create task using the SDK
-        const taskResponse = await client.tasks.create(taskData);
+
+
+        // // 2. Create task using the SDK
+        // const taskResponse = await client.tasks.create(taskData);
         
-        core.info(`✅ Created task: ${taskResponse.gid}`);
-        core.setOutput("task_id", taskResponse.gid);
+        // core.info(`✅ Created task: ${taskResponse.gid}`);
+        // core.setOutput("task_id", taskResponse.gid);
+
+         // 2. Create task
+         const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ data: taskData })
+        });
+
+        if (!taskResp.ok) {
+            const errorData = await taskResp.json();
+            throw new Error(`Failed to create task: ${JSON.stringify(errorData)}`);
+        }
+
+        const taskData = await taskResp.json() as AsanaTaskResponse;
+        core.info(`✅ Created task: ${taskData.data.gid}`);
+        core.setOutput("taskId", taskData.data.gid);
 
     } catch (error) {
         const message = (error as Error)?.message || String(error);

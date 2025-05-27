@@ -38,12 +38,11 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-              
           git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
-
-          git add ../actions
-          git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
-        working-directory: .github/code
+          git add dist/
+          git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
+          git push origin HEAD:${{ github.head_ref }}
+        working-directory: .github/actions/asana-task
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Use Asana Task Action
@@ -53,5 +52,8 @@ jobs:
           title: ${{ github.event.pull_request.title }}
           notes: "PR URL: ${{ github.event.pull_request.html_url }}"
           projectId: ${{ secrets.ASANA_PROJECT_ID }}
+<<<<<<< HEAD
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
+=======
+>>>>>>> parent of c50cf3f (more updates to the github personal token)

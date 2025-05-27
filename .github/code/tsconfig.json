@@ -6,8 +6,8 @@
         "lib": [
             "ES2022"
         ],
-        "outDir": "./prod",
-        "rootDir": "./src",
+        "outDir": "../../prod",
+        "rootDir": "",
         "strict": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -22,14 +22,20 @@
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "baseUrl": "",
+        "paths": {
+            "@/*": ["*"],
+            "@Components/*": ["components/*"],
+            "@Actions/*": ["actions/*"]
+        }
     },
     "include": [
-        "src/**/*"
+        "**/*"
     ],
     "exclude": [
         "node_modules",
-        "prod",
+        "../../prod",
         "**/*.test.ts"
     ]
 }

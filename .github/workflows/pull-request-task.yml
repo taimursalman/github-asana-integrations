@@ -28,7 +28,7 @@ jobs:
           node-version: 18
       - name: Install dependencies
         run: npm install
-        working-directory: .github/actions/asana-task
+        working-directory: .github/code
       - name: Build Action with ncc
         run: npm run build
         working-directory: .github/actions/asana-task

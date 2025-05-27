@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-
 import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
 import { AsanaTaskResponse } from '@/src/components/create-asana-task/create-asana-task.types';
 
@@ -20,17 +19,20 @@ export const createAsanaTask = async () => {
         const assigneeEmail = core.getInput('assignee-email');
         const githubUser = core.getInput('github-user');
 
+
+        
         // Log inputs for debugging
         core.info(`Title: ${title}`);
         core.info(`ProjectId: ${projectId}`);
         core.info(`Notes: ${notes}`);
         core.info(`Assignee Email: ${assigneeEmail}`);
         core.info(`GitHub User: ${githubUser}`);
-
+        
         // Configure Asana client
         // TODO: Uncomment this when we have a way to use the SDK
-        // const client = asana.Client.create();
-        // client.useAccessToken(token);
+        const asana = await import('asana');
+        const client = asana.Client.create();
+        client.useAccessToken(token);
 
         const workspaceGid = await getWorkspaceGid(token);
         core.info(`Workspace GID: ${workspaceGid}`);

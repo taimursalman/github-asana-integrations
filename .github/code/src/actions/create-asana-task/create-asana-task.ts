@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { Client } from 'asana';
 import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
 import { AsanaTaskResponse } from '@/src/components/create-asana-task/create-asana-task.types';
 
@@ -30,8 +31,7 @@ export const createAsanaTask = async () => {
         
         // Configure Asana client
         // TODO: Uncomment this when we have a way to use the SDK
-        const asana = await import('asana');
-        const client = asana.Client.create();
+        const client = Client.create();
         client.useAccessToken(token);
 
         const workspaceGid = await getWorkspaceGid(token);

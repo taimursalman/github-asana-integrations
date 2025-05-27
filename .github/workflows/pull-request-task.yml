@@ -31,7 +31,7 @@ jobs:
         working-directory: .github/code
       - name: Build Action with ncc
         run: npm run build
-        working-directory: .github/actions/asana-task
+        working-directory: .github/code
       - name: Commit built prod/ if changed
         run: |
           git config --global user.name 'github-actions'
@@ -41,7 +41,7 @@ jobs:
 
           git add prod/
           git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
-        working-directory: .github/actions/asana-task
+        working-directory: .github/code
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Use Asana Task Action

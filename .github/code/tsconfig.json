@@ -6,7 +6,7 @@
         "lib": [
             "ES2022"
         ],
-        "outDir": "../../prod",
+        "outDir": "src/prod",
         "rootDir": "",
         "strict": true,
         "esModuleInterop": true,
@@ -26,8 +26,8 @@
         "baseUrl": "",
         "paths": {
             "@/*": ["*"],
-            "@Components/*": ["components/*"],
-            "@Actions/*": ["actions/*"]
+            "@Components/*": ["src/components/*"],
+            "@Actions/*": ["src/actions/*"]
         }
     },
     "include": [

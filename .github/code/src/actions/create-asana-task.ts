@@ -1,9 +1,11 @@
-import { findAsanaUserByEmail, getWorkspaceGid } from '@/components/create-asana-task/create-asana-task-library';
-import { AsanaTaskData, AsanaTaskResponse } from '@/components/create-asana-task/create-asana-task.types';
+
 import * as core from '@actions/core';
 import fetch from 'node-fetch';
+import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
+import { AsanaTaskData, AsanaTaskResponse } from '@Components/create-asana-task/create-asana-task.types';
 
-export const run = async () => {
+
+export const createAsanaTask = async () => {
     try {
         const token = core.getInput('token');
         const title = core.getInput('title');

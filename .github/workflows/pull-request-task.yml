@@ -39,7 +39,7 @@ jobs:
               
           git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
-          git add prod/
+          git add ../../actions
           git diff --cached --quiet || git commit -m "Build prod output [skip ci]"
         working-directory: .github/code
         env:

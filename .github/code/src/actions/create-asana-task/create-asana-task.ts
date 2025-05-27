@@ -28,8 +28,9 @@ export const createAsanaTask = async () => {
         core.info(`GitHub User: ${githubUser}`);
 
         // Configure Asana client
-        const client = asana.Client.create();
-        client.useAccessToken(token);
+        // TODO: Uncomment this when we have a way to use the SDK
+        // const client = asana.Client.create();
+        // client.useAccessToken(token);
 
         const workspaceGid = await getWorkspaceGid(token);
         core.info(`Workspace GID: ${workspaceGid}`);
@@ -54,6 +55,7 @@ export const createAsanaTask = async () => {
 
 
 
+        // TODO: Uncomment this when we have a way to use the SDK
         // // 2. Create task using the SDK
         // const taskResponse = await client.tasks.create(taskData);
         
@@ -75,9 +77,9 @@ export const createAsanaTask = async () => {
             throw new Error(`Failed to create task: ${JSON.stringify(errorData)}`);
         }
 
-        const taskData = await taskResp.json() as AsanaTaskResponse;
-        core.info(`✅ Created task: ${taskData.data.gid}`);
-        core.setOutput("taskId", taskData.data.gid);
+        const taskResponse = await taskResp.json() as AsanaTaskResponse;
+        core.info(`✅ Created task: ${taskResponse.data.gid}`);
+        core.setOutput("taskId", taskResponse.data.gid);
 
     } catch (error) {
         const message = (error as Error)?.message || String(error);

@@ -14,7 +14,6 @@ jobs:
       - name: Get PR author emails
         id: get-emails
         run: |
-          # Get commit author email (most reliable)
           commit_email=$(gh api /repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits --jq '.[-1].commit.author.email')
           echo "commit_email=$commit_email" >> $GITHUB_OUTPUT
 
@@ -23,20 +22,16 @@ jobs:
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-
       - name: Install dependencies
         run: npm install
         working-directory: .github/actions/asana-task
-
       - name: Build Action with ncc
         run: npm run build
         working-directory: .github/actions/asana-task
-
       - name: Commit built dist/ if changed
         run: |
           git config --global user.name 'github-actions'
@@ -49,7 +44,6 @@ jobs:
         working-directory: .github/actions/asana-task
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Use Asana Task Action
         uses: ./.github/actions/asana-task
         with:

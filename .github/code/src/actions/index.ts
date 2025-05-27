@@ -1,4 +1,4 @@
-import { createAsanaTask } from "@Actions/create-asana-task";
+import { createAsanaTask } from "./create-asana-task";
 
 async function run(): Promise<void> {
 

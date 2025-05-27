@@ -21,17 +21,20 @@ export const createAsanaTask = async () => {
         const githubUser = core.getInput('github-user');
 
 
-        
+
         // Log inputs for debugging
         core.info(`Title: ${title}`);
         core.info(`ProjectId: ${projectId}`);
         core.info(`Notes: ${notes}`);
         core.info(`Assignee Email: ${assigneeEmail}`);
         core.info(`GitHub User: ${githubUser}`);
-        
+
         // Configure Asana client
         // TODO: Uncomment this when we have a way to use the SDK
         const client = Client.create();
+        core.info(' client created');
+        core.info(String(client))
+
         client.useAccessToken(token);
 
         const workspaceGid = await getWorkspaceGid(token);
@@ -61,12 +64,12 @@ export const createAsanaTask = async () => {
         // // 2. Create task using the SDK
         let a = await client.tasks.create(taskData);
         core.info(`✅ Created task: ${a.gid}`);
-        
+
         // core.info(`✅ Created task: ${taskResponse.gid}`);
         // core.setOutput("task_id", taskResponse.gid);
 
-         // 2. Create task
-         const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
+        // 2. Create task
+        const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

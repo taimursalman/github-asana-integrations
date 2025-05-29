@@ -61,8 +61,8 @@ export const createAsanaTask = async () => {
 
         // TODO: Uncomment this when we have a way to use the SDK
         // // 2. Create task using the SDK
-        let a = await client.tasks.create(taskData);
-        core.info(`✅ Created task: ${a.gid}`);
+        // let a = await client.tasks.create(taskData);
+        // core.info(`✅ Created task: ${a.gid}`);
 
         // core.info(`✅ Created task: ${taskResponse.gid}`);
         // core.setOutput("task_id", taskResponse.gid);

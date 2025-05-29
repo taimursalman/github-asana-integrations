@@ -21,7 +21,6 @@ export const createAsanaTask = async () => {
         const githubUser = core.getInput('github-user');
 
 
-
         // Log inputs for debugging
         core.info(`Title: ${title}`);
         core.info(`ProjectId: ${projectId}`);

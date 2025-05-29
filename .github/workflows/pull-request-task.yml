@@ -22,29 +22,6 @@ jobs:
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-     
-      # TODO: Keep this here if needed to dynamically load node modules in the future
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: 18
-      # - name: Install dependencies
-      #   run: npm install
-      #   working-directory: .github/code
-      # - name: Build Action with ncc
-      #   run: npm run prepack
-      #   working-directory: .github/code
-      - name: Commit built prod/ if changed
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git add dist/
-          git diff --cached --quiet || git commit -m "Build dist output [skip ci]"
-          git push origin HEAD:${{ github.head_ref }}
-        working-directory: .github/actions/asana-task
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Use Asana Task Action
         uses: ./.github/actions/create-asana-task
         with:

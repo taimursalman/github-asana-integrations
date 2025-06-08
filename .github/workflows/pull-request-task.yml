@@ -35,10 +35,23 @@ jobs:
           github-user: ${{ steps.get-emails.outputs.github_user }}
       - name: 'Store task ID as label'
         run: |
-          echo "task_id=${{ steps.create_task.outputs.task_id }}" >> $GITHUB_OUTPUT
-          gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
-            --method POST \
-            --field name="asana-task-${{ steps.create_task.outputs.task_id }}"
+          LABEL_NAME="asana-task-${{ steps.create_task.outputs.task_id }}"
+    
+          # Create and add label
+          gh label create "$LABEL_NAME" \
+            --color "d4c5f9" \
+            --description "Asana task ID" \
+            --repo ${{ github.repository }} \
+            || echo "Label already exists"
+          
+          # Then add it to the PR
+          gh pr edit ${{ github.event.number }} \
+            --add-label "$LABEL_NAME"
+                
         env:
           GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           
+# echo "task_id=${{ steps.create_task.outputs.task_id }}" >> $GITHUB_OUTPUT
+          # gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
+          #   --method POST \
+          #   --field name="asana-task-${{ steps.create_task.outputs.task_id }}"

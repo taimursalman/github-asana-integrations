@@ -6,6 +6,8 @@ on:
 
 jobs:
   asana:
+    permissions:
+      issues: write  # This grants permission to add labels to issues
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

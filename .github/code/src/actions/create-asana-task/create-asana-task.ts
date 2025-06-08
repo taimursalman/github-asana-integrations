@@ -38,7 +38,7 @@ export const createAsanaTask = async () => {
 
         const workspaceGid = await getWorkspaceGid(token);
         core.info(`Workspace GID: ${workspaceGid}`);
-
+ 
         const taskData: TaskData = {
             name: title,
             notes: notes,
@@ -50,7 +50,7 @@ export const createAsanaTask = async () => {
         if (assigneeEmail) {
             const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
             if (assignee) {
-                taskData.assignee = assignee.gid;
+                taskData.assignee = assignee.gid
                 core.info(`Found Asana user: ${assignee.name} (${assignee.email})`);
             } else {
                 core.warning(`Could not find Asana user with email: ${assigneeEmail}`);

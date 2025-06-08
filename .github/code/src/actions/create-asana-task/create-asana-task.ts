@@ -37,7 +37,7 @@ export const createAsanaTask = async () => {
 
         const workspaceGid = await getWorkspaceGid(token);
         core.info(`Workspace GID: ${workspaceGid}`);
- 
+
         const taskData: TaskData = {
             name: title,
             notes: notes,
@@ -82,7 +82,9 @@ export const createAsanaTask = async () => {
         }
 
         const taskResponse = await taskResp.json() as AsanaTaskResponse;
-        core.info(`✅ Created task: ${taskResponse.data.gid}`);
+        const createdTaskId = taskResponse.data.gid;
+
+        core.info(`✅ Created task: ${createdTaskId}`);
         core.setOutput("taskId", taskResponse.data.gid);
 
     } catch (error) {

@@ -22,7 +22,8 @@ jobs:
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Asana Task Action
+      - name: Create Asana Task
+        id: 'create_task'
         uses: ./.github/actions/create-asana-task
         with:
           token: ${{ secrets.ASANA_ACCESS_TOKEN }}
@@ -31,3 +32,11 @@ jobs:
           projectId: ${{ secrets.ASANA_PROJECT_ID }}
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
+      - name: 'Store task ID as label'
+        run: |
+          gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
+            --method POST \
+            --field name="asana-task-${{ steps.create_task.outputs.task_id }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          

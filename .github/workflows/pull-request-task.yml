@@ -7,7 +7,8 @@ on:
 jobs:
   asana:
     runs-on: ubuntu-latest
-
+    permissions: #TODO Taimur Salman: Might remove this later
+      issues: write  # This grants permission to add labels to issues
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +34,7 @@ jobs:
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
       - name: 'Store task ID as label'
+        
         run: |
           gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
             --method POST \

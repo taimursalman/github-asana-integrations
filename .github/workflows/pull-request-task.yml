@@ -32,8 +32,8 @@ jobs:
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
       - name: 'Store task ID as label'
-        
         run: |
+          echo "task_id=${{ steps.create_task.outputs.task_id }}" >> $GITHUB_OUTPUT
           gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
             --method POST \
             --field name="asana-task-${{ steps.create_task.outputs.task_id }}"

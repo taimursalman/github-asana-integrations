@@ -22,7 +22,7 @@ jobs:
           github_user="${{ github.event.pull_request.user.login }}"
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
       - name: Create Asana Task
         id: 'create_task'
         uses: ./.github/actions/create-asana-task
@@ -40,5 +40,5 @@ jobs:
             --method POST \
             --field name="asana-task-${{ steps.create_task.outputs.task_id }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           

@@ -20,6 +20,9 @@ inputs:
   github-user:
     description: "GitHub username of PR author"
     required: false
+outputs:
+  task_id:
+    description: 'Created Asana task ID'
 
 runs:
   using: "node20"

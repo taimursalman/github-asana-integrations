@@ -6,8 +6,9 @@ on:
 
 jobs:
   asana:
+    permissions:
+      issues: write  # This grants permission to add labels to issues
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -21,8 +22,9 @@ jobs:
           github_user="${{ github.event.pull_request.user.login }}"
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Asana Task Action
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+      - name: Create Asana Task
+        id: 'create_task'
         uses: ./.github/actions/create-asana-task
         with:
           token: ${{ secrets.ASANA_ACCESS_TOKEN }}
@@ -31,3 +33,25 @@ jobs:
           projectId: ${{ secrets.ASANA_PROJECT_ID }}
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
+      - name: 'Store task ID as label'
+        run: |
+          LABEL_NAME="asana-task-${{ steps.create_task.outputs.task_id }}"
+    
+          # Create and add label
+          gh label create "$LABEL_NAME" \
+            --color "d4c5f9" \
+            --description "Asana task ID" \
+            --repo ${{ github.repository }} \
+            || echo "Label already exists"
+          
+          # Then add it to the PR
+          gh pr edit ${{ github.event.number }} \
+            --add-label "$LABEL_NAME"
+                
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          
+# echo "task_id=${{ steps.create_task.outputs.task_id }}" >> $GITHUB_OUTPUT
+          # gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \
+          #   --method POST \
+          #   --field name="asana-task-${{ steps.create_task.outputs.task_id }}"

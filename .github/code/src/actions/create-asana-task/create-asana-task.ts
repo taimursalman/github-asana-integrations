@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 import { getWorkspaceGid, findAsanaUserByEmail } from '@Components/create-asana-task/create-asana-task-library';
 import { AsanaTaskResponse } from '@/src/components/create-asana-task/create-asana-task.types';
+import * as github from '@actions/github';
+import * as cache from '@actions/cache';
 
 interface TaskData {
     name: string;
@@ -82,10 +84,42 @@ export const createAsanaTask = async () => {
         }
 
         const taskResponse = await taskResp.json() as AsanaTaskResponse;
-        const createdTaskId = taskResponse.data.gid;
+        const taskId = taskResponse.data.gid;
 
-        core.info(`✅ Created task: ${createdTaskId}`);
-        core.setOutput("taskId", taskResponse.data.gid);
+        core.info(`✅ Created task: ${taskId}`);
+
+
+
+        // Store task ID in GitHub cache (private)
+        const pullRequestNumber = github.context.payload.pull_request?.number;
+        if (!pullRequestNumber) {
+            core.info('No pull request number found')
+            //add logic to return here
+            return;
+        }
+        const cacheKey = `asana-task-${pullRequestNumber}`;
+        const fs = require('fs');
+        fs.writeFileSync('task-id-cache', taskId);
+
+        try {
+            await cache.saveCache(['task-id-cache'], cacheKey);
+            core.info(`Task ID stored in cache with key: ${cacheKey}`);
+        } catch (error) {
+            core.info(`Cache save warning: ${error}`);
+
+            // Fallback: use GitHub API to store in PR comment (hidden)
+            // const octokit = github.getOctokit(core.getInput('github-token') || process.env.GITHUB_TOKEN);
+            // await octokit.rest.issues.createComment({
+            //     owner: github.context.repo.owner,
+            //     repo: github.context.repo.repo,
+            //     issue_number: pullRequestNumber,
+            //     body: `<!-- ASANA_TASK_ID:${taskId} -->`
+            // });
+            // core.info('Task ID stored in hidden PR comment as fallback');
+        }
+
+        // Set output
+        core.setOutput('task-id', taskId);
 
     } catch (error) {
         const message = (error as Error)?.message || String(error);

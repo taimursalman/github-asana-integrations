@@ -22,7 +22,7 @@ jobs:
           github_user="${{ github.event.pull_request.user.login }}"
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
       - name: Create Asana Task
         id: 'create_task'
         uses: ./.github/actions/create-asana-task
@@ -49,7 +49,7 @@ jobs:
             --add-label "$LABEL_NAME"
                 
         env:
-          GH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           
 # echo "task_id=${{ steps.create_task.outputs.task_id }}" >> $GITHUB_OUTPUT
           # gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/labels \

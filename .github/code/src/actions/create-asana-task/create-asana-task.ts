@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import { Client } from 'asana';
 import fetch from 'node-fetch';
 import { getWorkspaceGid, findAsanaUserByEmail } from '@components/create-asana-task/create-asana-task-library';
 import { AsanaTaskResponse } from '@components/create-asana-task/create-asana-task.types';
@@ -28,11 +27,6 @@ export const createAsanaTask = async () => {
         core.info(`Notes: ${notes}`);
         core.info(`Assignee Email: ${assigneeEmail}`);
         core.info(`GitHub User: ${githubUser}`);
-
-        // Configure Asana client
-        const client = Client.create();
-        client.useAccessToken(token);
-        core.info('Asana client configured successfully');
 
         const workspaceGid = await getWorkspaceGid(token);
         core.info(`Workspace GID: ${workspaceGid}`);

@@ -1,31 +1,28 @@
-name: "Create Asana Task"
-description: "Creates a new task in Asana"
+name: "Assign Asana Task"
+description: "Assigns an existing Asana task to a user based on PR assignment"
 author: "Taimur Salman"
 inputs:
   token:
     description: "Asana Personal Access Token"
     required: true
-  title:
-    description: "Task title"
+  pr-url:
+    description: "Pull Request URL"
     required: true
-  notes:
-    description: "Task notes"
-    required: false
   projectId:
     description: "Asana project GID"
     required: true
   assignee-email:
     description: "Email of person to assign task to"
-    required: false
+    required: true
   github-user:
-    description: "GitHub username of PR author"
+    description: "GitHub username of PR assignee"
     required: false
 
 outputs:
-  taskId:
-    description: "The GID of the created task"
-  taskUrl:
-    description: "The URL of the created task"
+  assigned:
+    description: "Whether the task was successfully assigned"
+  assignee:
+    description: "Name of the assigned user"
 
 runs:
   using: "node20"

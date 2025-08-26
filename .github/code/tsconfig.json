@@ -6,8 +6,8 @@
         "lib": [
             "ES2022"
         ],
-        "outDir": "src/prod",
-        "rootDir": "",
+        "outDir": "./dist",
+        "rootDir": "./src",
         "strict": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -16,26 +16,26 @@
         "resolveJsonModule": true,
         "declaration": true,
         "declarationMap": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "removeComments": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "baseUrl": "",
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "baseUrl": "./src",
         "paths": {
-            "@/*": ["*"],
-            "@Components/*": ["src/components/*"],
-            "@Actions/*": ["src/actions/*"],
+            "@/*": ["./*"],
+            "@components/*": ["./components/*"],
+            "@actions/*": ["./actions/*"]
         }
     },
     "include": [
-        "**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules",
-        "../../prod",
+        "dist",
         "**/*.test.ts"
     ]
 }

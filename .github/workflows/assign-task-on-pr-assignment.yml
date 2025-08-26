@@ -1,0 +1,34 @@
+name: Assign Asana Task on PR Assignment
+
+on:
+  pull_request:
+    types: [assigned]
+
+jobs:
+  assign-asana-task:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get assignee email
+        id: get-assignee-email
+        run: |
+          # Get the assignee's email from their commits in the repository
+          assignee_login="${{ github.event.assignee.login }}"
+          echo "assignee_login=$assignee_login" >> $GITHUB_OUTPUT
+          
+          # Try to get email from recent commits by this user
+          assignee_email=$(gh api /repos/${{ github.repository }}/commits --author="$assignee_login" --per-page=1 --jq '.[0].commit.author.email' || echo "")
+          echo "assignee_email=$assignee_email" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Assign Asana Task
+        uses: ./.github/actions/assign-asana-task
+        with:
+          token: ${{ secrets.ASANA_ACCESS_TOKEN }}
+          pr-url: ${{ github.event.pull_request.html_url }}
+          projectId: ${{ secrets.ASANA_PROJECT_ID }}
+          assignee-email: ${{ steps.get-assignee-email.outputs.assignee_email }}
+          github-user: ${{ steps.get-assignee-email.outputs.assignee_login }}

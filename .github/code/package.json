@@ -1,13 +1,15 @@
 {
     "name": "asana-github-action",
     "version": "1.0.0",
-    "description": "GitHub Action to create Asana tasks",
-    "main": "prod/index.js",
+    "description": "GitHub Action to create and assign Asana tasks",
+    "main": "dist/index.js",
     "scripts": {
         "typecheck": "tsc --noEmit",
         "build:create-asana-task": "ncc build src/actions/create-asana-task/index.ts -o ../actions/create-asana-task -m -q --no-source-map-register",
-        "build:all": "npm run build:create-asana-task",
-        "prepack": "npm run build:all",
+        "build:assign-asana-task": "ncc build src/actions/assign-asana-task/index.ts -o ../actions/assign-asana-task -m -q --no-source-map-register",
+        "build:all": "npm run build:create-asana-task && npm run build:assign-asana-task",
+        "build": "npm run build:all",
+        "clean": "rm -rf ../actions/*/index.js ../actions/*/package.json dist/",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {

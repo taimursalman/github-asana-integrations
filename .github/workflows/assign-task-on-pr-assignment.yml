@@ -19,7 +19,7 @@ jobs:
           echo "reviewer_login=$reviewer_login" >> $GITHUB_OUTPUT
           
           # Skip if reviewer is copilot or if no reviewer was requested
-          if [[ "$reviewer_login" == *"copilot"* ]] || [[ -z "$reviewer_login" ]]; then
+          if [[ "$reviewer_login" == *"Copilot"* ]] || [[ -z "$reviewer_login" ]]; then
             echo "Skipping assignment: reviewer is copilot or empty"
             echo "skip_assignment=true" >> $GITHUB_OUTPUT
             exit 0
@@ -27,9 +27,18 @@ jobs:
           
           echo "skip_assignment=false" >> $GITHUB_OUTPUT
           
-          # Try to get email from recent commits by this user
-          reviewer_email=$(gh api /repos/${{ github.repository }}/commits --author="$reviewer_login" --per-page=1 --jq '.[0].commit.author.email' || echo "")
+          # Get the reviewer's email using the Users API
+          reviewer_email=$(gh api /users/$reviewer_login --jq '.email' 2>/dev/null || echo "")
+          
+          # If email is null or empty, try to get it from recent commits in the repo
+          if [[ -z "$reviewer_email" || "$reviewer_email" == "null" ]]; then
+            echo "Public email not available, searching commits..."
+            # Get all commits and filter by author manually
+            reviewer_email=$(gh api "/repos/${{ github.repository }}/commits?per_page=100" --jq --arg author "$reviewer_login" '.[] | select(.author.login == $author) | .commit.author.email' | head -1 || echo "")
+          fi
+          
           echo "reviewer_email=$reviewer_email" >> $GITHUB_OUTPUT
+          echo "Email found for reviewer $reviewer_login"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

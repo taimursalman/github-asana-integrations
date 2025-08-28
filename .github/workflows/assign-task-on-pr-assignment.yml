@@ -38,7 +38,7 @@ jobs:
           fi
           
           echo "reviewer_email=$reviewer_email" >> $GITHUB_OUTPUT
-          echo "Found email for $reviewer_login: $reviewer_email"
+          echo "Email found for reviewer $reviewer_login"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

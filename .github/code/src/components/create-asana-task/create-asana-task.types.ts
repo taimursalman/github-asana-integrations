@@ -1,34 +1,41 @@
-export interface AsanaUserResponse {
-    data: AsanaUser[];
-    errors?: Array<{ message: string }>;
-}
-
 export interface AsanaUser {
     gid: string;
     name: string;
     email: string;
 }
 
-interface AsanaWorkspace {
-    gid: string;
+export interface AsanaUserResponse {
+    data: AsanaUser[];
+    errors?: any[];
 }
 
 export interface AsanaMeResponse {
     data: {
-        workspaces: AsanaWorkspace[];
+        gid: string;
+        workspaces: Array<{
+            gid: string;
+            name: string;
+        }>;
     };
-}
-
-export interface AsanaTaskData {
-    name: string;
-    notes: string;
-    projects: string[];
-    workspace: string;
-    assignee?: string;
 }
 
 export interface AsanaTaskResponse {
     data: {
         gid: string;
+        name: string;
+        assignee?: AsanaUser;
+        projects: Array<{
+            gid: string;
+            name: string;
+        }>;
     };
+}
+
+export interface AsanaTaskSearchResponse {
+    data: Array<{
+        gid: string;
+        name: string;
+        assignee?: AsanaUser;
+        notes?: string;
+    }>;
 }

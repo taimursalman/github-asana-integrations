@@ -3,6 +3,7 @@ import { getWorkspaceGid, findAsanaUserByEmail } from '@components/create-asana-
 import { findAsanaTaskByPrUrl, assignAsanaTask } from '@components/assign-asana-task/assign-asana-task-library';
 
 export const assignAsanaTaskAction = async () => {
+    core.info('Assigning asana task');
 
     try {
         const token = core.getInput('token');

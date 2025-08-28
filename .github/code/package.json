@@ -5,12 +5,11 @@
     "main": "dist/index.js",
     "scripts": {
         "typecheck": "tsc --noEmit",
-        "build:create-asana-task": "ncc build src/actions/create-asana-task/index.ts -o ../actions/create-asana-task -m -q --no-source-map-register",
-        "build:assign-asana-task": "ncc build src/actions/assign-asana-task/index.ts -o ../actions/assign-asana-task -m -q --no-source-map-register",
+        "build:create-asana-task": "ncc build src/components/create-asana-task/index.ts -o ../actions/create-asana-task -m -q --no-source-map-register",
+        "build:assign-asana-task": "ncc build src/components/assign-asana-task/index.ts -o ../actions/assign-asana-task -m -q --no-source-map-register",
         "build:all": "npm run build:create-asana-task && npm run build:assign-asana-task",
         "build": "npm run build:all",
         "clean": "rm -rf ../actions/*/index.js ../actions/*/package.json dist/",
-        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
         "@actions/core": "^1.11.1",

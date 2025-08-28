@@ -38,8 +38,8 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
-# Dependency directories - Keep node_modules for faster CI/CD
-# node_modules/ - COMMENTED OUT to include dependencies in repo
+# Dependency directories - Keep node_modules in .github/code for build tools
+.github/code/node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -50,6 +50,7 @@ web_modules/
 
 # Build output
 dist/
+.github/code/dist/
 
 # Optional npm cache directory
 .npm

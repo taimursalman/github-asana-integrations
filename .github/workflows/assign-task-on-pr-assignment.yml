@@ -19,7 +19,7 @@ jobs:
           echo "reviewer_login=$reviewer_login" >> $GITHUB_OUTPUT
           
           # Skip if reviewer is copilot or if no reviewer was requested
-          if [[ "$reviewer_login" == *"copilot"* ]] || [[ -z "$reviewer_login" ]]; then
+          if [[ "$reviewer_login" == *"Copilot"* ]] || [[ -z "$reviewer_login" ]]; then
             echo "Skipping assignment: reviewer is copilot or empty"
             echo "skip_assignment=true" >> $GITHUB_OUTPUT
             exit 0

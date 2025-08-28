@@ -22,7 +22,8 @@ jobs:
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Asana Task Action
+
+      - name: Create Asana Task
         uses: ./.github/actions/create-asana-task
         with:
           token: ${{ secrets.ASANA_ACCESS_TOKEN }}

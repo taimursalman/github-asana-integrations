@@ -2,7 +2,7 @@ name: Create Asana Task on PR
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [ opened, reopened ]
 
 jobs:
   asana:
@@ -10,6 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: '.github/actions'
+          sparse-checkout-cone-mode: false
 
       - name: Get PR author emails
         id: get-emails
@@ -17,7 +20,6 @@ jobs:
           commit_email=$(gh api /repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits --jq '.[-1].commit.author.email')
           echo "commit_email=$commit_email" >> $GITHUB_OUTPUT
 
-          # Get GitHub user login
           github_user="${{ github.event.pull_request.user.login }}"
           echo "github_user=$github_user" >> $GITHUB_OUTPUT
         env:
@@ -26,9 +28,13 @@ jobs:
       - name: Create Asana Task
         uses: ./.github/actions/create-asana-task
         with:
-          token: ${{ secrets.ASANA_ACCESS_TOKEN }}
+          token: ${{ secrets.T2_ASANA_DEV_ACCESS_TOKEN }}
           title: ${{ github.event.pull_request.title }}
-          notes: "PR URL: ${{ github.event.pull_request.html_url }}"
-          projectId: ${{ secrets.ASANA_PROJECT_ID }}
+          projectId: ${{ secrets.CODE_QUALITY_ASANA_PROJECT_ID }}
           assignee-email: ${{ steps.get-emails.outputs.commit_email }}
           github-user: ${{ steps.get-emails.outputs.github_user }}
+          pr-url: ${{ github.event.pull_request.html_url }}
+          pr-description: ${{ github.event.pull_request.body }}
+          pr-author: ${{ github.event.pull_request.user.login }}
+          branch-name: ${{ github.event.pull_request.head.ref }}
+          sprint-tag: ${{ secrets.ASANA_ENG_SPRINT_TAG_ID }}

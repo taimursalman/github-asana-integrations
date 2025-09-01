@@ -8,14 +8,14 @@ inputs:
   pr-url:
     description: "Pull Request URL"
     required: true
-  projectId:
+  project-id:
     description: "Asana project GID"
     required: true
   assignee-email:
     description: "Email of person to assign task to"
     required: true
-  github-user:
-    description: "GitHub username of PR assignee"
+  task-id:
+    description: "The asana task ID to be updated. If not passed, then uses the pr-url to get the asana task id"
     required: false
 
 outputs:

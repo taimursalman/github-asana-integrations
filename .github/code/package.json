@@ -13,9 +13,7 @@
     "clean-actions": "cd ../actions && rm -rf */index.js */package.json */components */actions && find . -name '*.d.ts*' -delete 2>/dev/null || true",
     "clean-build-artifacts": "cd ../actions && rm -rf */package.json && find . -name '*.d.ts*' -delete 2>/dev/null || true",
     "remove-components": "cd ../actions && rm -rf */components",
-    "clean": "npm run clean-actions",
-    "postinstall": "echo 'Dependencies installed successfully'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "npm run clean-actions"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",

@@ -1,13 +1,84 @@
-import { info, warning } from '@actions/core';
-import fetch from 'node-fetch';
-import { AsanaTaskSearchResponse, AsanaTaskResponse } from '../create-asana-task/create-asana-task.types';
+import {info, warning} from '@actions/core';
+import {AsanaTaskSearchResponse, AsanaTaskResponse} from '../create-asana-task/create-asana-task.types';
+// CodeReviewTaimurSDone: this file isnt following the TS formatting standards
+// CodeReviewTaimurDone: missing import for fetch
 
-export const findAsanaTaskByPrUrl = async (prUrl: string, token: string, projectId: string): Promise<string | null> => {
+export const getTaskFromProject = async (prUrl: string, token: string, projectId: string): Promise<string | null> => {
     try {
-        info(`Searching for Asana task with PR URL: ${prUrl}`);
+        const urlParts = prUrl.split('/');
+        const prNumber = urlParts[urlParts.length - 1]; // Get PR number
+        if (urlParts.length < 3 || !urlParts[urlParts.length - 3]) {
+            warning(`PR URL "${prUrl}" does not have the expected format to extract repository name.`);
+            return null;
+        }
 
-        // Search for tasks in the project that contain the PR URL in their notes
-        const response = await fetch(`https://app.asana.com/api/1.0/tasks/search?project=${projectId}&opt_fields=gid,name,notes`, {
+        const repoName = (urlParts[urlParts.length - 3]).toLowerCase(); // Get repository name
+        let offset: string | undefined = undefined;
+        const limit = 100;
+
+        do {
+            let url = `https://app.asana.com/api/1.0/projects/${projectId}/tasks?opt_fields=gid,name,notes&limit=${limit}&sort_by=modified_at&sort_ascending=false`;
+            if (offset) {
+                url += `&offset=${encodeURIComponent(offset)}`;
+            }
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                warning(`Failed to fetch project tasks: ${response.statusText}`);
+                warning(JSON.stringify(await response.json()));
+                return await getTaskFromRecentTasks(prUrl, token, projectId);
+            }
+
+            const data = await response.json() as AsanaTaskSearchResponse;
+            const exactTask = data.data.find(task =>
+                task.notes && task.notes.includes(prUrl)
+            );
+
+            if (exactTask) {
+                return exactTask.gid;
+            }
+
+            const prNumberMatch = data.data.find(task => {
+                const hasRepoInName = task.name && task.name.toLowerCase().includes(repoName);
+                const hasRepoInNotes = task.notes && task.notes.toLowerCase().includes(repoName);
+                const hasPrInName = task.name && task.name.includes(prNumber);
+                const hasPrInNotes = task.notes && task.notes.includes(prNumber);
+                return (hasRepoInName || hasRepoInNotes) && (hasPrInName || hasPrInNotes);
+            });
+            if (prNumberMatch) {
+                return prNumberMatch.gid;
+            }
+
+            const prOnlyMatch = data.data.find(task =>
+                (task.notes && task.notes.includes(prNumber)) ||
+                (task.name && task.name.includes(prNumber))
+            );
+            if (prOnlyMatch) {
+                return prOnlyMatch.gid;
+            }
+
+            offset = data.next_page && data.next_page.offset ? data.next_page.offset : undefined;
+        } while (offset);
+        return null;
+
+    } catch (error) {
+        warning(`Failed to search for task with PR URL ${prUrl}: ${(error as Error).message}`);
+        info('Attempting fallback search due to error...');
+        return await getTaskFromRecentTasks(prUrl, token, projectId);
+    }
+};
+
+async function getTaskFromRecentTasks(prUrl: string, token: string, projectId: string): Promise<string | null> {
+    try {
+        info('Using fallback search method - fetching recent tasks only');
+
+        const response = await fetch(`https://app.asana.com/api/1.0/tasks?project=${projectId}&opt_fields=gid,name,notes&limit=50&sort_by=modified_at&sort_ascending=false`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -15,30 +86,26 @@ export const findAsanaTaskByPrUrl = async (prUrl: string, token: string, project
         });
 
         if (!response.ok) {
-            warning(`Failed to search tasks: ${response.statusText}`);
+            warning(`Fallback search failed: ${response.statusText}`);
             return null;
         }
 
         const data = await response.json() as AsanaTaskSearchResponse;
-
-        // Find task that contains the PR URL in its notes
         const task = data.data.find(task =>
             task.notes && task.notes.includes(prUrl)
         );
 
         if (task) {
-            info(`Found task: ${task.name} (${task.gid})`);
+            info(`Found task via fallback: ${task.name} (${task.gid})`);
             return task.gid;
-        } else {
-            info(`No task found with PR URL: ${prUrl}`);
-            return null;
         }
 
+        return null;
     } catch (error) {
-        warning(`Failed to search for task with PR URL ${prUrl}: ${(error as Error).message}`);
+        warning(`Fallback search failed: ${(error as Error).message}`);
         return null;
     }
-};
+}
 
 export const assignAsanaTask = async (taskId: string, assigneeGid: string, token: string): Promise<boolean> => {
     try {

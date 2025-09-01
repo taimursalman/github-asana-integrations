@@ -1,3 +1,4 @@
+// CodeReviewTaimurSDone: formatting issues
 export interface AsanaUser {
     gid: string;
     name: string;
@@ -9,13 +10,21 @@ export interface AsanaUserResponse {
     errors?: any[];
 }
 
-export interface AsanaMeResponse {
+export interface AsanaWorkspace {
+    gid: string;
+    name: string;
+}
+
+export interface AsanaTaskProject {
+    gid: string;
+    name: string;
+}
+
+export interface AsanaWorkspaceResponse {
     data: {
         gid: string;
-        workspaces: Array<{
-            gid: string;
-            name: string;
-        }>;
+        // CodeReviewTaimurSDone: old array notation. make an interface for {gid, name} then do obj[]
+        workspaces: AsanaWorkspace[];
     };
 }
 
@@ -24,18 +33,34 @@ export interface AsanaTaskResponse {
         gid: string;
         name: string;
         assignee?: AsanaUser;
-        projects: Array<{
-            gid: string;
-            name: string;
-        }>;
+        // CodeReviewTaimurSDone: old array notation. make an interface for {gid, name} then do obj[]
+        projects: AsanaTaskProject[];
     };
 }
 
+export interface AsanaTaskSearchData {
+    gid: string;
+    name: string;
+    assignee?: AsanaUser;
+    notes?: string;
+}
+
+export interface AsanaTaskSearchLazyData {
+    offset: string;
+    path: string;
+    uri: string;
+}
+
 export interface AsanaTaskSearchResponse {
-    data: Array<{
-        gid: string;
-        name: string;
-        assignee?: AsanaUser;
-        notes?: string;
-    }>;
+    data: AsanaTaskSearchData[];
+    next_page: AsanaTaskSearchLazyData | null;
+}
+
+export interface TaskData {
+    name: string;
+    notes: string;
+    projects: string[];
+    workspace: string;
+    assignee?: string;
+    tags?: string[];
 }

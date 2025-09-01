@@ -1,76 +1,105 @@
 import * as core from '@actions/core';
-import fetch from 'node-fetch';
-import { getWorkspaceGid, findAsanaUserByEmail } from '@components/create-asana-task/create-asana-task-library';
-import { AsanaTaskResponse } from '@components/create-asana-task/create-asana-task.types';
-
-interface TaskData {
-    name: string;
-    notes: string;
-    projects: string[];
-    workspace: string;
-    assignee?: string;
-}
+import {
+    getWorkspaceGid,
+    findAsanaUserByEmail,
+    createAsanaTaskFromData,
+} from '@Components/create-asana-task/create-asana-task-library';
+import {TaskData} from '@Components/create-asana-task/create-asana-task.types';
+// CodeReviewTaimurSDone: missing import for fetch
+// CodeReviewTaimurSDone: file isn't following TS formatting standards
 
 export const createAsanaTask = async () => {
     try {
-        const token = core.getInput('token');
-        const title = core.getInput('title');
-        const notes = core.getInput('notes') || '';
-        const projectId = core.getInput('projectId');
+        const asanaAuthToken = core.getInput('token');
+        const prTitle = core.getInput('title');
+        const asanaProjectId = core.getInput('projectId');
         const assigneeEmail = core.getInput('assignee-email');
         const githubUser = core.getInput('github-user');
+        const prUrl = core.getInput('pr-url') || '';
+        const prDescription = core.getInput('pr-description') || '';
+        const prAuthor = core.getInput('pr-author') || githubUser || '';
+        const branchName = core.getInput('branch-name') || '';
+        const sprintTagId = core.getInput('sprint-tag') || '';
 
-
-        // Log inputs for debugging
-        core.info(`Title: ${title}`);
-        core.info(`ProjectId: ${projectId}`);
-        core.info(`Notes: ${notes}`);
+        core.info(`Title: ${prTitle}`);
+        core.info(`ProjectId: ${asanaProjectId}`);
         core.info(`Assignee Email: ${assigneeEmail}`);
         core.info(`GitHub User: ${githubUser}`);
+        core.info(`PR URL: ${prUrl}`);
+        core.info(`PR Author: ${prAuthor}`);
+        core.info(`Branch Name: ${branchName}`);
+        core.info(`PR Description Length: ${prDescription.length} characters`);
+        core.info(`Sprint tag is ${sprintTagId}`);
 
-        const workspaceGid = await getWorkspaceGid(token);
-        core.info(`Workspace GID: ${workspaceGid}`);
+        const workspaceGid = await getWorkspaceGid(asanaAuthToken);
+        let authorName: string = prAuthor, authorGid: string | undefined = undefined;
 
-        const taskData: TaskData = {
-            name: title,
-            notes: notes,
-            projects: [projectId],
-            workspace: workspaceGid
-        };
-
-        // Find assignee if email provided
         if (assigneeEmail) {
-            const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
-            if (assignee) {
-                taskData.assignee = assignee.gid;
-                core.info(`Found Asana user: ${assignee.name} (${assignee.email})`);
+            const authorAsanaUser = await findAsanaUserByEmail(assigneeEmail, asanaAuthToken, workspaceGid);
+            if (authorAsanaUser) {
+                core.info(`Found Asana user: ${authorAsanaUser.name} (${authorAsanaUser.email})`);
+                authorGid = authorAsanaUser.gid;
+                authorName = `${authorAsanaUser.name}`;
+            } else if (!prAuthor) {
+                core.info(`Could not find Asana user for author. The task will not be assigned to anyone`);
             } else {
-                core.warning(`Could not find Asana user with email: ${assigneeEmail}`);
+                core.info(`Could not find Asana user for author, using plain text: ${prAuthor}`);
             }
         }
 
-        // Create task using REST API
-        const taskResp = await fetch('https://app.asana.com/api/1.0/tasks', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ data: taskData })
-        });
+        const taskTitle = `Code Review: [${getBranchName(branchName, prUrl, prTitle)}]`;
+        let taskDescription = getAsanaTaskDescription(taskTitle, authorName, prDescription, prUrl);
+        const taskData: TaskData = {
+            name: taskTitle,
+            notes: taskDescription,
+            projects: [asanaProjectId],
+            workspace: workspaceGid,
+            assignee: authorGid ?? undefined,
+            tags: sprintTagId ? [sprintTagId] : undefined,
+        };
 
-        if (!taskResp.ok) {
-            const errorData = await taskResp.json();
-            throw new Error(`Failed to create task: ${JSON.stringify(errorData)}`);
-        }
+        const createdTaskData = await createAsanaTaskFromData(taskData, asanaAuthToken)
+        core.info(`✅ Created task: ${createdTaskData.data.gid}`);
 
-        const taskResponse = await taskResp.json() as AsanaTaskResponse;
-        core.info(`✅ Created task: ${taskResponse.data.gid}`);
-        core.setOutput("taskId", taskResponse.data.gid);
-        core.setOutput("taskUrl", `https://app.asana.com/0/${projectId}/${taskResponse.data.gid}`);
-
+        core.setOutput("taskId", createdTaskData.data.gid);
+        core.setOutput("taskUrl", `https://app.asana.com/0/${asanaProjectId}/${createdTaskData.data.gid}`);
     } catch (error) {
         const message = (error as Error)?.message || String(error);
         core.setFailed(`❌ Failed to create Asana task: ${message}`);
     }
+}
+
+function getBranchName(branchName: string, prUrl: string, title: string) {
+    let finalBranchName = branchName;
+    if (!finalBranchName && prUrl) {
+        const urlMatch = prUrl.match(/\/pull\/(\d+)$/);
+        if (urlMatch) {
+            finalBranchName = `PR-${urlMatch[1]}`;
+        }
+    }
+
+    if (!finalBranchName) {
+        finalBranchName = title;
+    }
+    return finalBranchName;
+}
+
+function getAsanaTaskDescription(taskTitle: string, authorName: string, prDescription: string, prUrl: string) {
+    let taskNotes = '';
+    taskNotes += `*Task Name:*\n ${taskTitle}\n\n`;
+    if (authorName) {
+        taskNotes += `*Branch Author:*\n ${authorName}\n\n`;
+    }
+    taskNotes += '*Changes:*\n\n';
+
+    if (prDescription && prDescription.trim()) {
+        taskNotes += prDescription.trim();
+    }
+
+    if (prUrl && prUrl.trim()) {
+        taskNotes += `\n\nPR URL: ${prUrl}`;
+    }
+
+    taskNotes += '\n\nThis task was created via GitHub Actions';
+    return taskNotes;
 }

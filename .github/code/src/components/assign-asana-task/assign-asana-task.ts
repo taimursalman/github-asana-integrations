@@ -1,47 +1,47 @@
 import * as core from '@actions/core';
-import { getWorkspaceGid, findAsanaUserByEmail } from '@components/create-asana-task/create-asana-task-library';
-import { findAsanaTaskByPrUrl, assignAsanaTask } from '@components/assign-asana-task/assign-asana-task-library';
-
+import {getWorkspaceGid, findAsanaUserByEmail} from '@Components/create-asana-task/create-asana-task-library';
+import {assignAsanaTask, getTaskFromProject} from "./assign-asana-task-library";
+// CodeReviewTaimurSDone: this file isnt following the TS formatting standards
 export const assignAsanaTaskAction = async () => {
-
     try {
-        const token = core.getInput('token');
+        const asanaAuthToken = core.getInput('token');
         const prUrl = core.getInput('pr-url');
-        const projectId = core.getInput('projectId');
+        const asanaProjectId = core.getInput('project-id');
         const assigneeEmail = core.getInput('assignee-email');
-        const githubUser = core.getInput('github-user');
+        let taskId: string | null = core.getInput('task-id');
 
-        // Log inputs for debugging
         core.info(`PR URL: ${prUrl}`);
-        core.info(`Project ID: ${projectId}`);
+        core.info(`Project ID: ${asanaProjectId}`);
         core.info(`Assignee Email: ${assigneeEmail}`);
-        core.info(`GitHub User: ${githubUser}`);
+        core.info(`Task ID: ${taskId}`);
 
         if (!assigneeEmail) {
             core.info('No assignee email provided, skipping task assignment');
             return;
         }
 
-        // Get workspace GID
-        const workspaceGid = await getWorkspaceGid(token);
-        core.info(`Workspace GID: ${workspaceGid}`);
-
-        // Find the Asana task associated with this PR
-        const taskId = await findAsanaTaskByPrUrl(prUrl, token, projectId);
-        if (!taskId) {
-            core.warning(`Could not find Asana task for PR: ${prUrl}`);
-            return;
+        if (!taskId && !prUrl) {
+            core.info('Neither Task ID nor PR Url provided, skipping task assignment');
         }
 
-        // Find the assignee in Asana
-        const assignee = await findAsanaUserByEmail(assigneeEmail, token, workspaceGid);
+        if (!taskId) {
+            taskId = await getTaskFromProject(prUrl, asanaAuthToken, asanaProjectId);
+            if (!taskId) {
+                core.warning(`Could not find Asana task for PR: ${prUrl}`);
+                return;
+            } else {
+                core.info(`Task ID retrieved from asana tasks' descriptions! ${taskId}`);
+            }
+        }
+
+        const workspaceGid = await getWorkspaceGid(asanaAuthToken);
+        const assignee = await findAsanaUserByEmail(assigneeEmail, asanaAuthToken, workspaceGid);
         if (!assignee) {
             core.warning(`Could not find Asana user with email: ${assigneeEmail}`);
             return;
         }
 
-        // Assign the task to the user
-        const success = await assignAsanaTask(taskId, assignee.gid, token);
+        const success = await assignAsanaTask(taskId, assignee.gid, asanaAuthToken);
         if (success) {
             core.info(`✅ Successfully assigned task to ${assignee.name}`);
             core.setOutput("assigned", "true");
@@ -49,7 +49,6 @@ export const assignAsanaTaskAction = async () => {
         } else {
             core.setFailed(`❌ Failed to assign task to ${assignee.name}`);
         }
-
     } catch (error) {
         const message = (error as Error)?.message || String(error);
         core.setFailed(`❌ Failed to assign Asana task: ${message}`);
